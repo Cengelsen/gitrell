@@ -18,4 +18,4 @@ It uses Shell-scripting to loop through your folders, and the branches of the re
 
 # WARNING
 
-There are scenarios described in the file that are not accounted for. Use at your own risk!
+There are scenarios described in the file that are currently not accounted for. Use at your own risk!
