@@ -9,8 +9,8 @@ This script does not currently account for the following scenarios:
 2. Somebody else has deleted the remote branch, without your knowledge. 
 
 This script is intended mainly for the scenario where you have finished and merged a branch
-on a different machine. This script should not be within the repo folder, but rather
-the root folder of all your repo-folders. However, you can comment out line 18, 20 an 64 if
+on a different machine. This script should not be within the repo folder, but rather in
+the root folder of all your repo-folders. However, you can comment out line 19, 21 an 65 if
 you want to use it in a single repo folder. 
 END
 
