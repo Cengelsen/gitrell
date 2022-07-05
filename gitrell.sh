@@ -17,16 +17,16 @@ END
 for folder in $PWD/*/; 
 do
        repo=${folder%*/};
-
        cd $repo/;
-
+       folderName=$(basename $PWD)
+       echo -e "-------\nNow working in $folderName. \n-------"
+       
        # finds the URL of the repo
        repoURL=$(git remote get-url origin);
        echo $repoURL
 
        # finds the main branch of the repo
        mainBranch=$(git remote show $repoURL | grep 'HEAD branch' | cut -d' ' -f5);
-       echo $mainBranch
 
        # list of local branches
        branches=$(git for-each-ref --format='%(refname:short)' refs/heads)
@@ -49,7 +49,7 @@ do
               else
                      # Skips the main branch, leaving it for last
                      if [ "$branch" == "$mainBranch" ]; then
-                            echo "Skipping main branch, $mainBranch" 
+                            echo "Skipping main branch; $mainBranch" 
                             continue 
                      fi
 
@@ -63,4 +63,5 @@ do
        git checkout $mainBranch;
        git fetch; git pull; 
        cd ..;
+       echo -e "-------\nStopped working in $folderName. \n-------"
 done
