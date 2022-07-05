@@ -39,12 +39,21 @@ do
               
               # case when a remote cannot be found
               if [ "$branchHasRemote" -eq "0" ]; then
-                     echo "$branch has no remote. Deleting..."
-                     git checkout $mainBranch;
-                     git branch -D $branch;
-                     git fetch; git pull;
-                     continue
-       
+
+                     read  -n 1 -p "$branch has no remote. Delete local branch? [y/n]:" "deleteLocal"
+
+                     if [ $deleteLocal = "y" ]; then
+                            echo -e "\nDeleting $branch..."
+                            git checkout $mainBranch;
+                            git branch -D $branch;
+                            git fetch; git pull;
+                            continue
+
+                     elif [ $deleteLocal = "n" ]; then
+                            echo -e "\nSkipping $branch. It was not deleted." 
+                            continue
+                     fi
+
               # case when a remote can be found
               else
                      # Skips the main branch, leaving it for last
@@ -65,3 +74,5 @@ do
        cd ..;
        echo -e "-------\nStopped working in $folderName. \n-------"
 done
+
+echo "All your repos are now synchronized!"
