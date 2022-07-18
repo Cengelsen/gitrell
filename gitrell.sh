@@ -7,7 +7,7 @@ This script does not currently account for the following scenarios:
 
 1. You have a local branch, that you've made yourself, without setting upstream branch
 2. Somebody else has deleted the remote branch, without your knowledge. 
-3. Merge conflicts between remote commits and local commits
+3. whether or not the repo has a submodule included
 
 This script is intended mainly for the scenario where you have finished and merged a branch
 on a different machine. This script should not be within the repo folder, but rather in
@@ -17,6 +17,7 @@ END
 
 for folder in $PWD/*/; 
 do
+       # establishes folder and moves into it
        repo=${folder%*/};
        cd $repo/;
        folderName=$(basename $PWD)
@@ -38,11 +39,12 @@ do
               # checks if current branch has remote, returns 0 if not 
               branchHasRemote=$(git ls-remote --heads $repoURL $branch | wc -l);
               
-              # case when a remote cannot be found
+              # case for when a remote cannot be found
               if [ "$branchHasRemote" -eq "0" ]; then
 
                      read  -n 1 -p "$branch has no remote. Delete local branch? [y/n]:" "deleteLocal"
 
+                     # case for when the user wants to delete local branch
                      if [ $deleteLocal = "y" ]; then
                             echo -e "\nDeleting $branch..."
                             git checkout $mainBranch;
@@ -50,12 +52,13 @@ do
                             git fetch; git pull;
                             continue
 
+                     # case for when the user wants to keep local branch
                      elif [ $deleteLocal = "n" ]; then
                             echo -e "\nSkipping $branch. It was not deleted." 
                             continue
                      fi
 
-              # case when a remote can be found
+              # case for when a remote can be found
               else
                      # Skips the main branch, leaving it for last
                      if [ "$branch" == "$mainBranch" ]; then
@@ -63,54 +66,30 @@ do
                             continue 
                      fi
 
+                     # pulls changes from remote
                      echo "$branch has remote. Fetching & pulling..."!
                      git checkout $branch;
                      git fetch; git pull;
                      
+                     # checks the differences between remote and local
                      localDiff=$(git diff -S "<<<<<<< HEAD" -S "=======" -S ">>>>>>> $(git name-rev --name-only MERGE_HEAD)" HEAD)
 
+                     # case when there is no conflict
                      if [ "$localDiff" == "" ]; then
                             echo "There are no merge-conflicts on $branch."
                             continue
-                     
-                     # scenarioer:
-                     # 1. Det er lokale filer/endringer som ikke er staged, som ligger utenfor en git add
-                            # - git diff gir tilbakemelding
 
-                     # 2. Det er lokale filer/endringer som er staged, men som ligger utenfor en git commit
-                            # - git diff gir IKKE tilbakemelding
-                     
-                     # 3. Det er lokale commits som har forandringer.
-                            # - git diff gir IKKE tilbakemelding
-
-                     
-                     # 1. sjekk om det er lokale forandringer
-                            # - om det er unstaged files - spør brukeren: git stash eller git clean -f -d
-                            # - om det er staged files - spør brukeren: git stash eller 
-                            # - om det er commits - sjekk om det er merge-conflicts og si ifra.
-
-                     # tracked = at filen er lagt til i indeksen til git. Da ligger den i en liste over filer som git følger med på.
-                     # staged = at forandringen er lagt til i en commit.
-                     
-                     # staged tracked file = en fil som følges med på, hvor forandringene er lagt til i hva som skal commites
-                     # unstaged tracked file = en fil som følges med på, hvor forandringene IKKE er lagt til i hva som skal commites.
-                     # unstaged untracked file = en fil som ikke følges med på, hvor forandringene IKKE er lagt til i hva som skal commites.
-
-                     # git checkout . = fjerner bare forandringer som ikke er staged
-                     # git clean -f -d = fjerner bare filer og mapper som både ikke er staged og ikke er tracked.
-                     # git reset --hard =  fjerner bare staged filer og unstaged filer som er tracked
-
-                     # burde også si ifra om du har lokale commits, og hvor mange. 
-                     # burde også gi brukeren valget å se diff på grenen
-
+                     # case when there is a conflict
                      elif [ "$localDiff" != "" ]; then
 
+                            # shows conflict
                             echo $localDiff
 
                             echo "There are merge-conflicts on $branch."
                             echo "\n1) Apply remote version and delete local changes?" 
                             read -n 1 -p "\n2) Keep and apply all local changes? [1/2]:" "mergeChanges"
 
+                            # case for when the user wants to remove local changes
                             if [ "$mergeChanges" = "1" ]; then
                                    read -n 1 -p "\nAre you sure? [y/n]:" "finalDecision"
 
@@ -131,6 +110,7 @@ do
 
                                           continue
 
+                            # case for when the user wants to keep all local changes
                             elif [ "$mergeChanges" = "2" ]; then
 
                                    # pulls and rebases the branch, and specifies the strategy of keeping local changes
@@ -142,6 +122,7 @@ do
               fi
        done
 
+       # finishes by synchronizing the main branch
        git checkout $mainBranch;
        git fetch; git pull; 
        cd ..;
