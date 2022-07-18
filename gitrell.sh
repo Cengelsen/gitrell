@@ -10,9 +10,9 @@ This script does not currently account for the following scenarios:
 3. whether or not the repo has a submodule included
 
 This script is intended mainly for the scenario where you have finished and merged a branch
-on a different machine. This script should not be within the repo folder, but rather in
-the root folder of all your repo-folders. However, you can comment out line 19, 21 an 65 if
-you want to use it in a single repo folder. 
+on a different machine. This script should optimally not be within the repo folder, but rather in
+the root folder of all your repo-folders. However, you can of course comment out the necessary 
+lines if you want to use it in a single repo folder. 
 END
 
 for folder in $PWD/*/; 
